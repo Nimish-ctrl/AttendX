@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AttendX — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#f8f7f4; --surface:#fff; --surface2:#f3f2ee;
+    --text:#1a1a1a; --muted:#8a8a8a; --border:#e8e6e1;
+    --green:#22a06b; --red:#d94f4f; --blue:#2563eb;
+  }
+  html,body { min-height:100vh; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,0.04) 1px,transparent 0);
+    background-size:28px 28px; pointer-events:none;
+  }
+
+  /* gate */
+  #gate {
+    position:fixed; inset:0; z-index:200;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg);
+  }
+  .gate-box {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:2.5rem; width:340px; text-align:center;
+  }
+  .gate-box .g-eye { font-size:2rem; margin-bottom:1.25rem; }
+  .gate-box h2 { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:400; margin-bottom:0.35rem; }
+  .gate-box p  { font-size:0.8rem; color:var(--muted); margin-bottom:1.5rem; line-height:1.6; }
+  .gate-box input {
+    width:100%; padding:0.75rem 1rem; background:var(--surface2); border:1px solid var(--border);
+    border-radius:10px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.88rem;
+    outline:none; text-align:center; letter-spacing:0.08em; margin-bottom:0.75rem;
+    transition:border-color 0.2s;
+  }
+  .gate-box input:focus { border-color:var(--text); }
+  .gate-err { font-size:0.78rem; color:var(--red); margin-bottom:0.75rem; display:none; }
+
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.1rem 2.5rem;
+    background:rgba(248,247,244,0.92); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:400; }
+  .logo em { font-style:italic; color:var(--muted); }
+  .nav-right { display:flex; align-items:center; gap:1.25rem; }
+  .admin-chip { font-size:0.68rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; padding:3px 10px; border-radius:20px; border:1px solid var(--border); color:var(--muted); }
+  .nav-back { font-size:0.8rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--text); }
+
+  .page { position:relative; z-index:1; padding:6rem 2rem 4rem; max-width:1000px; margin:0 auto; }
+
+  /* tabs */
+  .tabs { display:flex; gap:0; margin-bottom:2.5rem; border-bottom:1px solid var(--border); }
+  .tab {
+    padding:0.65rem 1.25rem; border:none; background:transparent;
+    font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:500;
+    color:var(--muted); cursor:pointer; position:relative; transition:color 0.2s;
+  }
+  .tab.active { color:var(--text); }
+  .tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--text); }
+
+  .tab-panel { display:none; animation:fadeIn 0.25s ease; }
+  .tab-panel.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-title { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:400; margin-bottom:0.4rem; letter-spacing:-0.01em; }
+  .section-sub   { font-size:0.82rem; color:var(--muted); line-height:1.7; margin-bottom:1.75rem; }
+
+  /* controls */
+  .controls {
+    display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;
+    padding:1rem 1.25rem; background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; margin-bottom:1.75rem;
+  }
+  .controls label { font-size:0.72rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap; }
+  input[type=date] {
+    padding:0.6rem 0.85rem; background:var(--surface2); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.82rem;
+    outline:none; cursor:pointer; color-scheme:light; transition:border-color 0.2s;
+  }
+  input[type=date]:focus { border-color:var(--text); }
+
+  /* buttons */
+  .btn {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    padding:0.6rem 1.25rem; border-radius:8px; border:1px solid transparent;
+    font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:500;
+    cursor:pointer; transition:all 0.2s; text-decoration:none;
+  }
+  .btn-dark  { background:var(--text); color:#fff; border-color:var(--text); }
+  .btn-dark:hover  { background:#333; }
+  .btn-ghost { background:transparent; color:var(--text); border-color:var(--border); }
+  .btn-ghost:hover { border-color:var(--text); }
+  .btn-danger { background:transparent; color:var(--red); border-color:#f0b8b8; }
+  .btn-danger:hover { background:#fdf2f2; }
+  .btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+  /* stats */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; margin-bottom:1.75rem; }
+  .stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.1rem 1.25rem; }
+  .stat .n { font-family:'Playfair Display',serif; font-size:1.9rem; font-weight:400; }
+  .stat .l { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px; }
+  .stat.g .n { color:var(--green); }
+  .stat.r .n { color:var(--red); }
+  .stat.b .n { color:var(--blue); }
+
+  /* table */
+  .tbl-wrap { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .tbl-head {
+    display:grid; grid-template-columns:1.8fr 2.5fr 1fr 1.8fr 1.2fr 0.6fr;
+    padding:0.65rem 1.25rem;
+    background:var(--surface2); border-bottom:1px solid var(--border);
+    font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; font-weight:500;
+  }
+  .tbl-row {
+    display:grid; grid-template-columns:1.8fr 2.5fr 1fr 1.8fr 1.2fr 0.6fr;
+    padding:0.8rem 1.25rem; border-bottom:1px solid var(--border);
+    align-items:center; transition:background 0.15s; animation:fadeIn 0.2s ease;
+  }
+  .tbl-row:last-child { border-bottom:none; }
+  .tbl-row:hover { background:var(--surface2); }
+  .tbl-row .roll { font-size:0.75rem; color:var(--muted); font-family:monospace; }
+  .tbl-row .name { font-size:0.88rem; font-weight:500; }
+  .tbl-row .time { font-size:0.75rem; color:var(--muted); }
+  .tbl-row .conf { font-size:0.75rem; color:var(--muted); }
+
+  .chip { font-size:0.68rem; font-weight:500; padding:3px 9px; border-radius:20px; display:inline-flex; align-items:center; gap:4px; }
+  .chip.p { background:#f0faf5; color:var(--green); border:1px solid #a7e0c4; }
+  .chip.a { background:#fdf2f2; color:var(--red);   border:1px solid #f0b8b8; }
+
+  /* enrolled grid */
+  .enrolled-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0.75rem; }
+  .e-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:1rem 1.1rem; display:flex; align-items:center; gap:0.85rem;
+    animation:fadeIn 0.25s ease;
+  }
+  .avatar {
+    width:36px; height:36px; border-radius:50%; background:var(--surface2);
+    border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+    font-size:0.78rem; font-weight:600; color:var(--muted); flex-shrink:0;
+  }
+  .e-card .info { flex:1; min-width:0; }
+  .e-card .ename { font-size:0.88rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .e-card .eroll { font-size:0.72rem; color:var(--muted); font-family:monospace; }
+  .e-card .edate { font-size:0.7rem; color:var(--muted); margin-top:1px; }
+
+  .del-btn {
+    background:transparent; border:none; cursor:pointer; color:var(--muted);
+    padding:4px; border-radius:6px; line-height:1; font-size:0.9rem;
+    transition:color 0.2s, background 0.2s; flex-shrink:0;
+  }
+  .del-btn:hover { color:var(--red); background:#fdf2f2; }
+
+  /* confirm modal */
+  #modal-bg {
+    position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.25); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center; display:none;
+  }
+  .modal {
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:2rem; width:320px; text-align:center;
+  }
+  .modal h3 { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:400; margin-bottom:0.5rem; }
+  .modal p  { font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:1.5rem; }
+  .modal-btns { display:flex; gap:0.6rem; justify-content:center; }
+
+  /* empty / loading */
+  .empty { text-align:center; padding:3.5rem 1rem; color:var(--muted); font-size:0.85rem; }
+
+  .spin { width:13px;height:13px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;display:none; }
+  @keyframes sp { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<!-- gate -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="g-eye">🔐</div>
+    <h2>Admin access</h2>
+    <p>Enter the admin key to continue.</p>
+    <p class="gate-err" id="gate-err">Incorrect key. Try again.</p>
+    <input type="password" id="gate-input" placeholder="Admin key" />
+    <button class="btn btn-dark" style="width:100%" onclick="checkKey()">Enter →</button>
+  </div>
+</div>
+
+<!-- confirm delete modal -->
+<div id="modal-bg">
+  <div class="modal">
+    <h3>Remove student?</h3>
+    <p id="modal-msg">This will delete the student and their face data. Attendance logs are kept.</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <div class="logo">Attend<em>X</em></div>
+  <div class="nav-right">
+    <span class="admin-chip">Admin</span>
+    <a href="index.html" class="nav-back">← Home</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="tabs">
+    <button class="tab active" onclick="sw('report')">Daily Report</button>
+    <button class="tab" onclick="sw('enrolled'); loadEnrolled()">Students</button>
+  </div>
+
+  <!-- REPORT TAB -->
+  <div class="tab-panel active" id="tab-report">
+    <h2 class="section-title">Attendance report</h2>
+    <p class="section-sub">Select a date to see who attended and who didn't.</p>
+
+    <div class="controls">
+      <label>Date</label>
+      <input type="date" id="date-pick" />
+      <button class="btn btn-dark" id="load-btn" onclick="loadReport()">Load <div class="spin" id="load-spin"></div></button>
+      <button class="btn btn-ghost" onclick="setToday()">Today</button>
+    </div>
+
+    <div id="report-stats" style="display:none">
+      <div class="stats">
+        <div class="stat">  <div class="n" id="s-tot">0</div><div class="l">Enrolled</div></div>
+        <div class="stat g"><div class="n" id="s-pre">0</div><div class="l">Present</div></div>
+        <div class="stat r"><div class="n" id="s-abs">0</div><div class="l">Absent</div></div>
+        <div class="stat b"><div class="n" id="s-pct">—</div><div class="l">Attendance</div></div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <span>Roll No.</span><span>Name</span><span>Status</span>
+          <span>Marked at</span><span>Confidence</span><span></span>
+        </div>
+        <div id="tbl-body"></div>
+      </div>
+    </div>
+
+    <div class="empty" id="report-empty">Select a date and load the report.</div>
+  </div>
+
+  <!-- STUDENTS TAB -->
+  <div class="tab-panel" id="tab-enrolled">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <h2 class="section-title">Students</h2>
+        <p class="section-sub" style="margin-bottom:0">All enrolled students. Delete removes face data.</p>
+      </div>
+      <button class="btn btn-ghost" onclick="loadEnrolled()">↻ Refresh</button>
+    </div>
+    <div class="enrolled-grid" id="enrolled-grid">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let KEY = '';
+let pendingDelete = null;
+
+// gate
+document.getElementById('gate-input').addEventListener('keydown', e => { if(e.key==='Enter') checkKey(); });
+
+async function checkKey() {
+  const k = document.getElementById('gate-input').value.trim();
+  if (!k) return;
+  const r = await fetch(`${API}/students?key=${encodeURIComponent(k)}`);
+  if (r.ok) {
+    KEY = k;
+    document.getElementById('gate').style.display = 'none';
+    setToday(); loadReport();
+  } else {
+    document.getElementById('gate-err').style.display = 'block';
+  }
+}
+
+function sw(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', ['report','enrolled'][i]===t));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+function setToday() {
+  document.getElementById('date-pick').value = new Date().toISOString().split('T')[0];
+}
+
+async function loadReport() {
+  const date = document.getElementById('date-pick').value;
+  if (!date) return;
+  const btn  = document.getElementById('load-btn');
+  const spin = document.getElementById('load-spin');
+  btn.disabled = true; spin.style.display = 'block';
+
+  try {
+    const r = await fetch(`${API}/attendance?date=${date}&key=${encodeURIComponent(KEY)}`);
+    const d = await r.json();
+    if (!r.ok) { alert(d.detail); return; }
+
+    document.getElementById('s-tot').textContent = d.total;
+    document.getElementById('s-pre').textContent = d.attended;
+    document.getElementById('s-abs').textContent = d.absent;
+    const pct = d.total > 0 ? Math.round((d.attended/d.total)*100) : 0;
+    document.getElementById('s-pct').textContent = pct + '%';
+
+    document.getElementById('tbl-body').innerHTML = d.report.map(row => {
+      const time = row.present
+        ? new Date(row.marked_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
+        : '—';
+      const conf = row.present ? `${(row.similarity*100).toFixed(1)}%` : '—';
+      return `<div class="tbl-row">
+        <span class="roll">${row.roll_no}</span>
+        <span class="name">${row.name}</span>
+        <span><span class="chip ${row.present?'p':'a'}">${row.present?'Present':'Absent'}</span></span>
+        <span class="time">${time}</span>
+        <span class="conf">${conf}</span>
+        <span></span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('report-empty').style.display  = 'none';
+    document.getElementById('report-stats').style.display  = 'block';
+  } catch(e) { alert('Cannot reach server.'); }
+
+  btn.disabled = false; spin.style.display = 'none';
+}
+
+async function loadEnrolled() {
+  const grid = document.getElementById('enrolled-grid');
+  grid.innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const r = await fetch(`${API}/students?key=${encodeURIComponent(KEY)}`);
+    const d = await r.json();
+    if (!d.students.length) { grid.innerHTML='<div class="empty">No students enrolled yet.</div>'; return; }
+    grid.innerHTML = d.students.map(s => {
+      const initials = s.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      const date = new Date(s.enrolled_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      return `<div class="e-card" id="card-${s.roll_no}">
+        <div class="avatar">${initials}</div>
+        <div class="info">
+          <div class="ename">${s.name}</div>
+          <div class="eroll">${s.roll_no}</div>
+          <div class="edate">Enrolled ${date}</div>
+        </div>
+        <button class="del-btn" onclick="askDelete('${s.roll_no}','${s.name}')" title="Remove student">✕</button>
+      </div>`;
+    }).join('');
+  } catch(e) { grid.innerHTML='<div class="empty">Could not load students.</div>'; }
+}
+
+// delete flow
+function askDelete(roll, name) {
+  pendingDelete = roll;
+  document.getElementById('modal-msg').textContent =
+    `Remove "${name}" (${roll})? Their face data will be deleted. Attendance logs are kept.`;
+  document.getElementById('modal-bg').style.display = 'flex';
+  document.getElementById('modal-confirm').onclick = confirmDelete;
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').style.display = 'none';
+  pendingDelete = null;
+}
+
+async function confirmDelete() {
+  if (!pendingDelete) return;
+  const roll = pendingDelete;
+  closeModal();
+  try {
+    const r = await fetch(`${API}/students/${encodeURIComponent(roll)}?key=${encodeURIComponent(KEY)}`, {method:'DELETE'});
+    if (r.ok) {
+      const card = document.getElementById(`card-${roll}`);
+      if (card) { card.style.opacity='0'; card.style.transform='scale(0.95)'; card.style.transition='all 0.25s'; setTimeout(()=>card.remove(), 250); }
+    } else {
+      const d = await r.json(); alert(d.detail || 'Delete failed.');
+    }
+  } catch(e) { alert('Cannot reach server.'); }
+}
+
+// close modal on bg click
+document.getElementById('modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+</script>
+</body>
+</html>

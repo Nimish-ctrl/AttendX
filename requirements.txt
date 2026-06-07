@@ -1,0 +1,10 @@
+deepface==0.0.93
+faiss-cpu==1.8.0
+numpy==1.26.4
+opencv-python-headless==4.9.0.80
+tf-keras==2.16.0
+fastapi==0.115.0
+uvicorn==0.30.6
+python-multipart==0.0.9
+supabase==2.31.0
+python-dotenv==1.0.1
