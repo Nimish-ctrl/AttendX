@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AttendX — Space</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root { --bg:#f8f7f4; --surface:#fff; --surface2:#f3f2ee; --text:#1a1a1a; --muted:#8a8a8a; --border:#e8e6e1; --green:#22a06b; --red:#d94f4f; --blue:#2563eb; }
+  html,body { min-height:100vh; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+  body::before { content:''; position:fixed; inset:0; z-index:0; background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,0.04) 1px,transparent 0); background-size:28px 28px; pointer-events:none; }
+
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:1.1rem 2.5rem; background:rgba(248,247,244,0.92); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
+  .logo { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:400; }
+  .logo em { font-style:italic; color:var(--muted); }
+  .nav-back { font-size:0.8rem; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+  .nav-back:hover { color:var(--text); }
+
+  .page { position:relative; z-index:1; padding:6rem 2rem 4rem; max-width:1000px; margin:0 auto; }
+
+  .head-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+  .page-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:400; }
+  .code-pill { font-size:0.78rem; font-family:monospace; letter-spacing:0.1em; background:var(--surface2); border:1px solid var(--border); padding:5px 12px; border-radius:8px; margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem; }
+  .code-pill button { background:none; border:none; cursor:pointer; color:var(--muted); font-size:0.78rem; font-family:'Inter',sans-serif; }
+  .code-pill button:hover { color:var(--text); }
+  .attend-link-btn { font-size:0.8rem; }
+
+  .tabs { display:flex; gap:0; margin-bottom:2rem; border-bottom:1px solid var(--border); }
+  .tab { padding:0.65rem 1.25rem; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:500; color:var(--muted); cursor:pointer; position:relative; transition:color 0.2s; }
+  .tab.active { color:var(--text); }
+  .tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--text); }
+  .tab-panel { display:none; animation:fadeIn 0.25s ease; }
+  .tab-panel.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .controls { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; padding:1rem 1.25rem; background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:1.75rem; }
+  .controls label { font-size:0.72rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap; }
+  input[type=date] { padding:0.6rem 0.85rem; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.82rem; outline:none; cursor:pointer; color-scheme:light; }
+
+  .btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.6rem 1.25rem; border-radius:8px; border:1px solid transparent; font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.2s; text-decoration:none; }
+  .btn-dark { background:var(--text); color:#fff; border-color:var(--text); }
+  .btn-dark:hover { background:#333; }
+  .btn-ghost { background:transparent; color:var(--text); border-color:var(--border); }
+  .btn-ghost:hover { border-color:var(--text); }
+  .btn-danger { background:transparent; color:var(--red); border-color:#f0b8b8; }
+  .btn-danger:hover { background:#fdf2f2; }
+
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; margin-bottom:1.75rem; }
+  .stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.1rem 1.25rem; }
+  .stat .n { font-family:'Playfair Display',serif; font-size:1.9rem; font-weight:400; }
+  .stat .l { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px; }
+  .stat.g .n { color:var(--green); } .stat.r .n { color:var(--red); } .stat.b .n { color:var(--blue); }
+
+  .tbl-wrap { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .tbl-head { display:grid; grid-template-columns:1.8fr 2.5fr 1fr 1.8fr 1.2fr; padding:0.65rem 1.25rem; background:var(--surface2); border-bottom:1px solid var(--border); font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; font-weight:500; }
+  .tbl-row { display:grid; grid-template-columns:1.8fr 2.5fr 1fr 1.8fr 1.2fr; padding:0.8rem 1.25rem; border-bottom:1px solid var(--border); align-items:center; animation:fadeIn 0.2s ease; }
+  .tbl-row:last-child { border-bottom:none; }
+  .tbl-row:hover { background:var(--surface2); }
+  .tbl-row .roll { font-size:0.75rem; color:var(--muted); font-family:monospace; }
+  .tbl-row .name { font-size:0.88rem; font-weight:500; }
+  .tbl-row .time, .tbl-row .conf { font-size:0.75rem; color:var(--muted); }
+  .chip { font-size:0.68rem; font-weight:500; padding:3px 9px; border-radius:20px; }
+  .chip.p { background:#f0faf5; color:var(--green); border:1px solid #a7e0c4; }
+  .chip.a { background:#fdf2f2; color:var(--red); border:1px solid #f0b8b8; }
+
+  .members-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0.75rem; }
+  .m-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1rem 1.1rem; display:flex; align-items:center; gap:0.85rem; animation:fadeIn 0.25s ease; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:600; color:var(--muted); flex-shrink:0; }
+  .m-card .info { flex:1; min-width:0; }
+  .m-card .mname { font-size:0.88rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .m-card .mroll { font-size:0.72rem; color:var(--muted); font-family:monospace; }
+  .m-card .mdate { font-size:0.7rem; color:var(--muted); margin-top:1px; }
+  .del-btn { background:transparent; border:none; cursor:pointer; color:var(--muted); padding:4px; border-radius:6px; font-size:0.9rem; transition:color 0.2s, background 0.2s; flex-shrink:0; }
+  .del-btn:hover { color:var(--red); background:#fdf2f2; }
+
+  .empty { text-align:center; padding:3.5rem 1rem; color:var(--muted); font-size:0.85rem; }
+  .spin { width:13px;height:13px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:sp 0.7s linear infinite;display:none; }
+  @keyframes sp { to{transform:rotate(360deg)} }
+
+  #modal-bg { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.25); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; width:320px; text-align:center; }
+  .modal h3 { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:400; margin-bottom:0.5rem; }
+  .modal p { font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:1.5rem; }
+  .modal-btns { display:flex; gap:0.6rem; justify-content:center; }
+
+  #qr-modal-bg { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.25); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+  .qr-modal { width:340px; }
+  #qr-canvas-wrap { display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--border); border-radius:12px; padding:1rem; }
+  #qr-canvas-wrap img, #qr-canvas-wrap canvas { display:block; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Attend<em>X</em></div>
+  <a href="dashboard.html" class="nav-back">← All spaces</a>
+</nav>
+
+<div id="modal-bg">
+  <div class="modal">
+    <h3>Remove member?</h3>
+    <p id="modal-msg"></p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div id="qr-modal-bg">
+  <div class="modal qr-modal">
+    <h3>Scan to mark attendance</h3>
+    <p>Students scan this with their own phone to open the scan station for this space.</p>
+    <div id="qr-canvas-wrap"></div>
+    <div class="modal-btns" style="justify-content:center;margin-top:1.25rem;">
+      <button class="btn btn-ghost" onclick="closeQrModal()">Close</button>
+      <a href="#" class="btn btn-dark" id="qr-open-link" target="_blank">Open link ↗</a>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="head-row">
+    <div>
+      <h1 class="page-title" id="space-name">Loading...</h1>
+      <div class="code-pill">
+        <span id="space-code">······</span>
+        <button onclick="copyCode()">copy</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+      <a href="#" class="btn btn-ghost attend-link-btn" id="attend-link" target="_blank">Open scan station ↗</a>
+      <button class="btn btn-dark attend-link-btn" id="qr-btn" onclick="openQrModal()">Show QR ⊞</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="sw('report')">Daily report</button>
+    <button class="tab" onclick="sw('members'); loadMembers()">Members</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-report">
+    <div class="controls">
+      <label>Date</label>
+      <input type="date" id="date-pick" />
+      <button class="btn btn-dark" id="load-btn" onclick="loadReport()">Load <div class="spin" id="load-spin"></div></button>
+      <button class="btn btn-ghost" onclick="setToday()">Today</button>
+    </div>
+
+    <div id="report-stats" style="display:none">
+      <div class="stats">
+        <div class="stat"><div class="n" id="s-tot">0</div><div class="l">Enrolled</div></div>
+        <div class="stat g"><div class="n" id="s-pre">0</div><div class="l">Present</div></div>
+        <div class="stat r"><div class="n" id="s-abs">0</div><div class="l">Absent</div></div>
+        <div class="stat b"><div class="n" id="s-pct">—</div><div class="l">Attendance</div></div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head"><span>ID</span><span>Name</span><span>Status</span><span>Marked at</span><span>Confidence</span></div>
+        <div id="tbl-body"></div>
+      </div>
+    </div>
+    <div class="empty" id="report-empty">Select a date and load the report.</div>
+  </div>
+
+  <div class="tab-panel" id="tab-members">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <p style="font-size:0.82rem;color:var(--muted)">All enrolled members. Removing deletes their face data.</p>
+      <button class="btn btn-ghost" onclick="loadMembers()">↻ Refresh</button>
+    </div>
+    <div class="members-grid" id="members-grid"><div class="empty">Loading...</div></div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+const TOKEN = localStorage.getItem('attendx_token');
+const params = new URLSearchParams(window.location.search);
+const CLASSROOM_ID = params.get('id');
+
+if (!TOKEN) window.location.href = 'login.html';
+if (!CLASSROOM_ID) window.location.href = 'dashboard.html';
+
+let currentSpace = null;
+let pendingDeleteRoll = null;
+let qrInstance = null;
+
+function sw(t) {
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active', ['report','members'][i]===t));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+function setToday() {
+  document.getElementById('date-pick').value = new Date().toISOString().split('T')[0];
+}
+
+function attendUrl() {
+  if (!currentSpace) return null;
+  return `${window.location.origin}/attend.html?id=${CLASSROOM_ID}&name=${encodeURIComponent(currentSpace.name)}`;
+}
+
+function openQrModal() {
+  const url = attendUrl();
+  if (!url) return;
+
+  document.getElementById('qr-open-link').href = url;
+  const wrap = document.getElementById('qr-canvas-wrap');
+  wrap.innerHTML = '';
+  qrInstance = new QRCode(wrap, {
+    text: url,
+    width: 220,
+    height: 220,
+    colorDark: '#1a1a1a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  document.getElementById('qr-modal-bg').style.display = 'flex';
+}
+
+function closeQrModal() {
+  document.getElementById('qr-modal-bg').style.display = 'none';
+}
+
+async function loadSpaceInfo() {
+  try {
+    const r = await fetch(`${API}/classrooms`, { headers:{'Authorization':`Bearer ${TOKEN}`} });
+    if (r.status === 401) { window.location.href='login.html'; return; }
+    const d = await r.json();
+    currentSpace = d.classrooms.find(c => c.id === CLASSROOM_ID);
+    if (!currentSpace) { window.location.href='dashboard.html'; return; }
+
+    document.getElementById('space-name').textContent = currentSpace.name;
+    document.getElementById('space-code').textContent = currentSpace.join_code;
+    document.getElementById('attend-link').href = `attend.html?id=${CLASSROOM_ID}&name=${encodeURIComponent(currentSpace.name)}`;
+  } catch(e) {}
+}
+
+function copyCode() {
+  if (!currentSpace) return;
+  navigator.clipboard.writeText(currentSpace.join_code);
+  const btn = event.target;
+  const old = btn.textContent;
+  btn.textContent = 'copied';
+  setTimeout(()=>btn.textContent=old, 1200);
+}
+
+async function loadReport() {
+  const date = document.getElementById('date-pick').value;
+  if (!date) return;
+  const btn = document.getElementById('load-btn');
+  const spin = document.getElementById('load-spin');
+  btn.disabled = true; spin.style.display = 'block';
+
+  try {
+    const r = await fetch(`${API}/attendance?classroom_id=${CLASSROOM_ID}&date=${date}`, { headers:{'Authorization':`Bearer ${TOKEN}`} });
+    const d = await r.json();
+    if (!r.ok) { alert(d.detail); return; }
+
+    document.getElementById('s-tot').textContent = d.total;
+    document.getElementById('s-pre').textContent = d.attended;
+    document.getElementById('s-abs').textContent = d.absent;
+    document.getElementById('s-pct').textContent = (d.total>0 ? Math.round((d.attended/d.total)*100) : 0) + '%';
+
+    document.getElementById('tbl-body').innerHTML = d.report.map(row => {
+      const time = row.present ? new Date(row.marked_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '—';
+      const conf = row.present ? `${(row.similarity*100).toFixed(1)}%` : '—';
+      return `<div class="tbl-row">
+        <span class="roll">${row.roll_no}</span>
+        <span class="name">${row.name}</span>
+        <span><span class="chip ${row.present?'p':'a'}">${row.present?'Present':'Absent'}</span></span>
+        <span class="time">${time}</span>
+        <span class="conf">${conf}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('report-empty').style.display = 'none';
+    document.getElementById('report-stats').style.display = 'block';
+  } catch(e) { alert('Cannot reach server.'); }
+
+  btn.disabled = false; spin.style.display = 'none';
+}
+
+async function loadMembers() {
+  const grid = document.getElementById('members-grid');
+  grid.innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const r = await fetch(`${API}/classrooms/${CLASSROOM_ID}/students`, { headers:{'Authorization':`Bearer ${TOKEN}`} });
+    const d = await r.json();
+    if (!d.students.length) { grid.innerHTML='<div class="empty">No members enrolled yet. Share the code above.</div>'; return; }
+
+    grid.innerHTML = d.students.map(s => {
+      const initials = s.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+      const date = new Date(s.enrolled_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      return `<div class="m-card" id="card-${s.roll_no}">
+        <div class="avatar">${initials}</div>
+        <div class="info">
+          <div class="mname">${s.name}</div>
+          <div class="mroll">${s.roll_no}</div>
+          <div class="mdate">Enrolled ${date}</div>
+        </div>
+        <button class="del-btn" onclick="askDelete('${s.roll_no}','${s.name}')">✕</button>
+      </div>`;
+    }).join('');
+  } catch(e) { grid.innerHTML='<div class="empty">Could not load members.</div>'; }
+}
+
+function askDelete(roll, name) {
+  pendingDeleteRoll = roll;
+  document.getElementById('modal-msg').textContent = `Remove "${name}" (${roll})? Their face data will be deleted from this space.`;
+  document.getElementById('modal-bg').style.display = 'flex';
+  document.getElementById('modal-confirm').onclick = confirmDelete;
+}
+function closeModal() { document.getElementById('modal-bg').style.display = 'none'; pendingDeleteRoll = null; }
+
+async function confirmDelete() {
+  if (!pendingDeleteRoll) return;
+  const roll = pendingDeleteRoll;
+  closeModal();
+  try {
+    const r = await fetch(`${API}/classrooms/${CLASSROOM_ID}/students/${encodeURIComponent(roll)}`, {
+      method:'DELETE', headers:{'Authorization':`Bearer ${TOKEN}`}
+    });
+    if (r.ok) {
+      const card = document.getElementById(`card-${roll}`);
+      if (card) { card.style.opacity='0'; card.style.transform='scale(0.95)'; card.style.transition='all 0.25s'; setTimeout(()=>card.remove(),250); }
+    } else { const d = await r.json(); alert(d.detail || 'Could not remove member.'); }
+  } catch(e) { alert('Cannot reach server.'); }
+}
+
+document.getElementById('modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+document.getElementById('qr-modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closeQrModal(); });
+
+loadSpaceInfo();
+setToday();
+loadReport();
+</script>
+</body>
+</html>

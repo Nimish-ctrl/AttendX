@@ -7,148 +7,82 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-  :root {
-    --bg:#f8f7f4; --surface:#fff; --surface2:#f3f2ee;
-    --text:#1a1a1a; --muted:#8a8a8a; --border:#e8e6e1;
-    --green:#22a06b; --red:#d94f4f;
-  }
+  :root { --bg:#f8f7f4; --surface:#fff; --surface2:#f3f2ee; --text:#1a1a1a; --muted:#8a8a8a; --border:#e8e6e1; --green:#22a06b; --red:#d94f4f; }
   html, body { height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+  body::before { content:''; position:fixed; inset:0; z-index:0; background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,0.04) 1px,transparent 0); background-size:28px 28px; pointer-events:none; }
 
-  body::before {
-    content:''; position:fixed; inset:0; z-index:0;
-    background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,0.04) 1px,transparent 0);
-    background-size:28px 28px; pointer-events:none;
-  }
-
-  nav {
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:1.1rem 2rem;
-    background:rgba(248,247,244,0.92); backdrop-filter:blur(16px);
-    border-bottom:1px solid var(--border);
-  }
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:1.1rem 2rem; background:rgba(248,247,244,0.92); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
   .logo { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:400; }
   .logo em { font-style:italic; color:var(--muted); }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .space-chip { font-size:0.75rem; color:var(--muted); background:var(--surface2); border:1px solid var(--border); padding:3px 10px; border-radius:20px; }
   .clock { font-size:0.8rem; color:var(--muted); font-variant-numeric:tabular-nums; letter-spacing:0.02em; }
 
-  /* screens */
-  .screen {
-    position:fixed; inset:0; z-index:10;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2rem; padding:2rem;
-    transition:opacity 0.4s ease;
-  }
+  .screen { position:fixed; inset:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2rem; padding:2rem; transition:opacity 0.4s ease; }
   .screen.hidden { opacity:0; pointer-events:none; }
 
-  /* idle */
   .idle-eyebrow { font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); }
   .idle-title { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,5vw,3.5rem); font-weight:400; text-align:center; letter-spacing:-0.01em; line-height:1.15; }
   .idle-title em { font-style:italic; color:var(--muted); }
 
-  .scan-btn {
-    width:160px; height:160px; border-radius:50%;
-    background:var(--text); border:none; cursor:pointer; color:#fff;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem;
-    transition:transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow:0 4px 24px rgba(0,0,0,0.12);
-    position:relative;
-  }
-  .scan-btn::before {
-    content:''; position:absolute; inset:-12px; border-radius:50%;
-    border:1px solid rgba(0,0,0,0.08);
-    animation:ring 2.5s ease-in-out infinite;
-  }
-  .scan-btn::after {
-    content:''; position:absolute; inset:-24px; border-radius:50%;
-    border:1px solid rgba(0,0,0,0.04);
-    animation:ring 2.5s ease-in-out infinite 0.4s;
-  }
-  @keyframes ring {
-    0%   { transform:scale(1); opacity:1; }
-    100% { transform:scale(1.15); opacity:0; }
-  }
+  .scan-btn { width:160px; height:160px; border-radius:50%; background:var(--text); border:none; cursor:pointer; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; transition:transform 0.2s ease, box-shadow 0.2s ease; box-shadow:0 4px 24px rgba(0,0,0,0.12); position:relative; }
+  .scan-btn::before { content:''; position:absolute; inset:-12px; border-radius:50%; border:1px solid rgba(0,0,0,0.08); animation:ring 2.5s ease-in-out infinite; }
+  .scan-btn::after { content:''; position:absolute; inset:-24px; border-radius:50%; border:1px solid rgba(0,0,0,0.04); animation:ring 2.5s ease-in-out infinite 0.4s; }
+  @keyframes ring { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.15);opacity:0} }
   .scan-btn:hover { transform:scale(1.04); box-shadow:0 8px 32px rgba(0,0,0,0.18); }
   .scan-btn:active { transform:scale(0.96); }
   .scan-icon { font-size:2rem; line-height:1; }
   .scan-label { font-size:0.72rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; }
 
-  /* camera */
-  .cam-box {
-    position:relative; width:min(480px,88vw); aspect-ratio:4/3;
-    border-radius:20px; overflow:hidden; border:1px solid var(--border);
-    background:var(--surface2);
-    box-shadow:0 8px 40px rgba(0,0,0,0.08);
-  }
+  .cam-box { position:relative; width:min(480px,88vw); aspect-ratio:4/3; border-radius:20px; overflow:hidden; border:1px solid var(--border); background:var(--surface2); box-shadow:0 8px 40px rgba(0,0,0,0.08); }
   #video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
-
   .oval-wrap { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
-  .oval {
-    width:180px; height:230px; border-radius:50%;
-    border:2px solid rgba(255,255,255,0.6);
-    box-shadow:0 0 0 9999px rgba(0,0,0,0.38);
-    transition:border-color 0.3s;
-  }
+  .oval { width:180px; height:230px; border-radius:50%; border:2px solid rgba(255,255,255,0.6); box-shadow:0 0 0 9999px rgba(0,0,0,0.38); transition:border-color 0.3s; }
   .oval.active { border-color:rgba(255,255,255,0.9); }
-
-  .cd-wrap {
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    pointer-events:none; opacity:0; transition:opacity 0.25s;
-  }
+  .cd-wrap { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity 0.25s; }
   .cd-wrap.show { opacity:1; }
-  .cd-num {
-    font-family:'Playfair Display',serif; font-size:9rem; font-weight:400; color:#fff;
-    text-shadow:0 2px 20px rgba(0,0,0,0.3);
-    animation:pop 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  }
+  .cd-num { font-family:'Playfair Display',serif; font-size:9rem; font-weight:400; color:#fff; text-shadow:0 2px 20px rgba(0,0,0,0.3); animation:pop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes pop { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
   .cam-hint { font-size:0.8rem; color:var(--muted); text-align:center; }
-  .cancel-btn {
-    background:transparent; border:1px solid var(--border); color:var(--muted);
-    padding:0.55rem 1.25rem; border-radius:8px; font-family:'Inter',sans-serif;
-    font-size:0.78rem; cursor:pointer; transition:all 0.2s;
-  }
+  .cancel-btn { background:transparent; border:1px solid var(--border); color:var(--muted); padding:0.55rem 1.25rem; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.78rem; cursor:pointer; transition:all 0.2s; }
   .cancel-btn:hover { border-color:var(--red); color:var(--red); }
 
-  /* result */
-  .result-circle {
-    width:100px; height:100px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center; font-size:2.5rem;
-    animation:popIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .result-circle.ok  { background:#f0faf5; border:1px solid #a7e0c4; }
-  .result-circle.no  { background:#fdf2f2; border:1px solid #f0b8b8; }
-  .result-circle.warn{ background:#fffbeb; border:1px solid #fde68a; }
+  .result-circle { width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; animation:popIn 0.45s cubic-bezier(0.34,1.56,0.64,1); }
+  .result-circle.ok { background:#f0faf5; border:1px solid #a7e0c4; }
+  .result-circle.no { background:#fdf2f2; border:1px solid #f0b8b8; }
+  .result-circle.warn { background:#fffbeb; border:1px solid #fde68a; }
   @keyframes popIn { from{transform:scale(0.2);opacity:0} to{transform:scale(1);opacity:1} }
 
-  .result-name {
-    font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem);
-    font-weight:400; text-align:center; letter-spacing:-0.01em;
-    animation:upIn 0.35s ease 0.1s both;
-  }
-  .result-name.ok   { color:var(--green); }
-  .result-name.no   { color:var(--red); }
-  .result-name.warn { color:#b45309; }
-  .result-sub  { color:var(--muted); font-size:0.88rem; text-align:center; animation:upIn 0.35s ease 0.2s both; }
+  .result-name { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:400; text-align:center; letter-spacing:-0.01em; animation:upIn 0.35s ease 0.1s both; }
+  .result-name.ok { color:var(--green); } .result-name.no { color:var(--red); } .result-name.warn { color:#b45309; }
+  .result-sub { color:var(--muted); font-size:0.88rem; text-align:center; animation:upIn 0.35s ease 0.2s both; }
   .result-meta { font-size:0.75rem; color:var(--muted); animation:upIn 0.35s ease 0.3s both; font-variant-numeric:tabular-nums; }
-
   .bar-wrap { width:220px; height:2px; background:var(--border); border-radius:2px; overflow:hidden; animation:upIn 0.35s ease 0.35s both; }
   .bar { height:100%; background:var(--muted); animation:drain 4s linear forwards; }
   @keyframes drain { from{width:100%} to{width:0} }
-  @keyframes upIn  { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes upIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
+  .no-space { text-align:center; color:var(--muted); font-size:0.9rem; line-height:1.8; }
   canvas { display:none; }
 </style>
 </head>
 <body>
 <nav>
   <div class="logo">Attend<em>X</em></div>
-  <div class="clock" id="clock"></div>
+  <div class="nav-right">
+    <span class="space-chip" id="space-chip">—</span>
+    <div class="clock" id="clock"></div>
+  </div>
 </nav>
 
 <canvas id="canvas"></canvas>
 
-<!-- idle -->
-<div class="screen" id="s-idle">
+<div class="screen hidden" id="s-noid">
+  <p class="no-space">No space selected.<br>Open this page from your space's dashboard.</p>
+</div>
+
+<div class="screen hidden" id="s-idle">
   <p class="idle-eyebrow">Face Recognition</p>
   <h1 class="idle-title">Mark your<br><em>attendance</em></h1>
   <button class="scan-btn" onclick="go()">
@@ -157,7 +91,6 @@
   </button>
 </div>
 
-<!-- camera -->
 <div class="screen hidden" id="s-cam">
   <div class="cam-box">
     <video id="video" autoplay playsinline muted></video>
@@ -168,7 +101,6 @@
   <button class="cancel-btn" onclick="cancel()">Cancel</button>
 </div>
 
-<!-- result -->
 <div class="screen hidden" id="s-result">
   <div class="result-circle" id="r-circle"></div>
   <div class="result-name"   id="r-name"></div>
@@ -179,9 +111,19 @@
 
 <script>
 const API = window.location.origin;
+const params = new URLSearchParams(window.location.search);
+const CLASSROOM_ID = params.get('id');
+const SPACE_NAME = params.get('name') || 'Space';
+
 let stream = null, cdTimer = null, resetTimer = null;
 
-// clock
+if (!CLASSROOM_ID) {
+  show('s-noid');
+} else {
+  document.getElementById('space-chip').textContent = SPACE_NAME;
+  show('s-idle');
+}
+
 setInterval(() => {
   document.getElementById('clock').textContent =
     new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -197,7 +139,6 @@ async function go() {
     stream = document.getElementById('video').srcObject =
       await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'}});
     show('s-cam');
-    // short settle time then count down
     setTimeout(startCd, 900);
   } catch(e) { alert('Camera access denied.'); }
 }
@@ -223,7 +164,9 @@ function shoot() {
   ctx.translate(c.width,0); ctx.scale(-1,1); ctx.drawImage(v,0,0);
   stopCam();
   c.toBlob(async blob => {
-    const fd = new FormData(); fd.append('photo', blob, 'shot.jpg');
+    const fd = new FormData();
+    fd.append('classroom_id', CLASSROOM_ID);
+    fd.append('photo', blob, 'shot.jpg');
     try {
       const r = await fetch(`${API}/recognize`,{method:'POST',body:fd});
       render(await r.json());
@@ -238,7 +181,6 @@ function render(d) {
   const rm = document.getElementById('r-meta');
   const bw = document.getElementById('bar-wrap');
   const b  = document.getElementById('bar');
-  // reset bar
   b.style.animation='none'; b.offsetHeight; b.style.animation='';
 
   if (d.status === 'identified') {
@@ -250,8 +192,8 @@ function render(d) {
   } else if (d.status === 'not_identified') {
     ci.textContent='✗'; ci.className='result-circle no';
     rn.textContent='Not recognised'; rn.className='result-name no';
-    rs.textContent='Face not found in the system.';
-    rm.textContent='Please enroll at student.html first.';
+    rs.textContent='Face not found in this space.';
+    rm.textContent='Join with the space code first.';
   } else {
     ci.textContent='!'; ci.className='result-circle warn';
     rn.textContent='Could not scan'; rn.className='result-name warn';

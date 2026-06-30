@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AttendX — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root { --bg:#f8f7f4; --surface:#fff; --surface2:#f3f2ee; --text:#1a1a1a; --muted:#8a8a8a; --border:#e8e6e1; --green:#22a06b; --red:#d94f4f; }
+  html,body { min-height:100vh; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+  body::before { content:''; position:fixed; inset:0; z-index:0; background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,0.04) 1px,transparent 0); background-size:28px 28px; pointer-events:none; }
+
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:1.1rem 2.5rem; background:rgba(248,247,244,0.92); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
+  .logo { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:400; }
+  .logo em { font-style:italic; color:var(--muted); }
+  .nav-right { display:flex; align-items:center; gap:1.25rem; }
+  .nav-name { font-size:0.82rem; color:var(--muted); }
+  .nav-link { font-size:0.8rem; color:var(--muted); text-decoration:none; cursor:pointer; transition:color 0.2s; background:none; border:none; font-family:'Inter',sans-serif; }
+  .nav-link:hover { color:var(--text); }
+
+  .page { position:relative; z-index:1; padding:6rem 2rem 4rem; max-width:1000px; margin:0 auto; }
+  .page-head { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+  .page-title { font-family:'Playfair Display',serif; font-size:1.9rem; font-weight:400; }
+  .page-sub { font-size:0.82rem; color:var(--muted); margin-top:0.3rem; }
+
+  .btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.65rem 1.4rem; border-radius:10px; border:1px solid transparent; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:500; cursor:pointer; transition:all 0.2s; text-decoration:none; }
+  .btn-dark { background:var(--text); color:#fff; border-color:var(--text); }
+  .btn-dark:hover { background:#333; }
+  .btn-ghost { background:transparent; color:var(--text); border-color:var(--border); }
+  .btn-ghost:hover { border-color:var(--text); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+  .space-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; text-decoration:none; color:var(--text); transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s; animation:fadeIn 0.3s ease; cursor:pointer; }
+  .space-card:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(0,0,0,0.06); border-color:var(--text); }
+  .space-card .sname { font-family:'Playfair Display',serif; font-size:1.25rem; font-weight:400; margin-bottom:0.5rem; }
+  .space-card .scode { font-size:0.7rem; color:var(--muted); font-family:monospace; letter-spacing:0.08em; background:var(--surface2); padding:3px 8px; border-radius:6px; display:inline-block; margin-bottom:0.75rem; }
+  .space-card .smeta { font-size:0.76rem; color:var(--muted); }
+
+  .empty { text-align:center; padding:5rem 1rem; color:var(--muted); }
+  .empty .big { font-size:2.5rem; margin-bottom:1rem; opacity:0.3; }
+  .empty p { font-size:0.88rem; line-height:1.6; }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* modal */
+  #modal-bg { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.25); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; width:340px; }
+  .modal h3 { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:400; margin-bottom:1.25rem; }
+  .modal label { display:block; font-size:0.72rem; font-weight:500; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+  .modal input { width:100%; padding:0.75rem 0.9rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Inter',sans-serif; font-size:0.88rem; outline:none; margin-bottom:1.25rem; }
+  .modal-btns { display:flex; gap:0.6rem; justify-content:flex-end; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Attend<em>X</em></div>
+  <div class="nav-right">
+    <span class="nav-name" id="nav-name"></span>
+    <button class="nav-link" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<div id="modal-bg">
+  <div class="modal">
+    <h3>New space</h3>
+    <label>Name</label>
+    <input type="text" id="new-name" placeholder="e.g. CS101 or Marketing Team" />
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-dark" onclick="confirmCreate()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Your spaces</h1>
+      <p class="page-sub">Create a space, share its code, and track attendance.</p>
+    </div>
+    <button class="btn btn-dark" onclick="openModal()">+ New space</button>
+  </div>
+
+  <div class="grid" id="grid">
+    <div class="empty"><p>Loading...</p></div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+const TOKEN = localStorage.getItem('attendx_token');
+
+if (!TOKEN) window.location.href = 'login.html';
+
+document.getElementById('nav-name').textContent = localStorage.getItem('attendx_name') || '';
+
+function logout() {
+  localStorage.removeItem('attendx_token');
+  localStorage.removeItem('attendx_name');
+  window.location.href = 'index.html';
+}
+
+async function loadSpaces() {
+  const grid = document.getElementById('grid');
+  try {
+    const r = await fetch(`${API}/classrooms`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+    if (r.status === 401) { logout(); return; }
+    const d = await r.json();
+
+    if (!d.classrooms.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <div class="big">○</div>
+        <p>No spaces yet.<br>Create one to start tracking attendance.</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = d.classrooms.map(c => {
+      const date = new Date(c.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      return `<a href="classroom.html?id=${c.id}" class="space-card">
+        <div class="sname">${c.name}</div>
+        <div class="scode">${c.join_code}</div>
+        <div class="smeta">Created ${date}</div>
+      </a>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = '<div class="empty"><p>Could not load spaces.</p></div>';
+  }
+}
+
+function openModal() {
+  document.getElementById('modal-bg').style.display = 'flex';
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-name').focus();
+}
+function closeModal() { document.getElementById('modal-bg').style.display = 'none'; }
+
+async function confirmCreate() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) return;
+  try {
+    const r = await fetch(`${API}/classrooms`, {
+      method:'POST',
+      headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({ name })
+    });
+    if (r.ok) { closeModal(); loadSpaces(); }
+    else { const d = await r.json(); alert(d.detail || 'Could not create space.'); }
+  } catch(e) { alert('Cannot reach server.'); }
+}
+
+document.getElementById('new-name').addEventListener('keydown', e => { if(e.key==='Enter') confirmCreate(); });
+document.getElementById('modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+loadSpaces();
+</script>
+</body>
+</html>

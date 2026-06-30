@@ -8,128 +8,52 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #f8f7f4;
-    --surface: #ffffff;
-    --text: #1a1a1a;
-    --muted: #8a8a8a;
-    --border: #e8e6e1;
-    --accent: #1a1a1a;
-    --accent-soft: #f0efe9;
+    --bg: #f8f7f4; --surface: #ffffff;
+    --text: #1a1a1a; --muted: #8a8a8a; --border: #e8e6e1;
   }
-  html, body {
-    height: 100%; background: var(--bg); color: var(--text);
-    font-family: 'Inter', sans-serif; overflow: hidden;
-  }
-
-  /* subtle texture */
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
   body::before {
     content: ''; position: fixed; inset: 0; z-index: 0;
     background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.04) 1px, transparent 0);
     background-size: 28px 28px; pointer-events: none;
   }
-
-  .wrap {
-    position: relative; z-index: 1; height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 0; padding: 2rem;
-  }
-
-  .eyebrow {
-    font-size: 10px; font-weight: 500; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 2.5rem;
-    opacity: 0; animation: up 0.6s ease forwards 0.1s;
-  }
-
-  h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 7vw, 5.5rem);
-    font-weight: 400; letter-spacing: -0.02em;
-    text-align: center; line-height: 1;
-    color: var(--text); margin-bottom: 1.25rem;
-    opacity: 0; animation: up 0.7s ease forwards 0.25s;
-  }
+  .wrap { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+  .eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 2.5rem; opacity: 0; animation: up 0.6s ease forwards 0.1s; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 400; letter-spacing: -0.02em; text-align: center; line-height: 1; color: var(--text); margin-bottom: 1.25rem; opacity: 0; animation: up 0.7s ease forwards 0.25s; }
   h1 em { font-style: italic; color: var(--muted); }
-
-  .sub {
-    font-size: 0.9rem; font-weight: 300; color: var(--muted);
-    text-align: center; line-height: 1.7; margin-bottom: 3.5rem;
-    opacity: 0; animation: up 0.7s ease forwards 0.4s;
-  }
-
-  .cards {
-    display: flex; gap: 1rem;
-    opacity: 0; animation: up 0.7s ease forwards 0.55s;
-  }
-
-  .card {
-    position: relative; width: 200px; padding: 1.75rem;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; text-decoration: none; color: var(--text);
-    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-  }
-  .card:hover {
-    border-color: var(--text); transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
-  }
-
-  .card-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    margin-bottom: 1.5rem;
-  }
-  .card.student .card-dot { background: #1a1a1a; }
-  .card.admin   .card-dot { background: #8a8a8a; }
-
+  .sub { font-size: 0.9rem; font-weight: 300; color: var(--muted); text-align: center; line-height: 1.7; margin-bottom: 3.5rem; opacity: 0; animation: up 0.7s ease forwards 0.4s; }
+  .cards { display: flex; gap: 1rem; opacity: 0; animation: up 0.7s ease forwards 0.55s; }
+  .card { position: relative; width: 220px; padding: 1.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; color: var(--text); transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; cursor: pointer; }
+  .card:hover { border-color: var(--text); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+  .card-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 1.5rem; background: #1a1a1a; }
   .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
-  .card p  { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
-
-  .card-arrow {
-    position: absolute; bottom: 1.5rem; right: 1.5rem;
-    font-size: 0.8rem; color: var(--muted);
-    transition: transform 0.25s, color 0.25s;
-  }
+  .card p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+  .card-arrow { position: absolute; bottom: 1.5rem; right: 1.5rem; font-size: 0.8rem; color: var(--muted); transition: transform 0.25s, color 0.25s; }
   .card:hover .card-arrow { transform: translate(2px,-2px); color: var(--text); }
-
-  .footer {
-    position: fixed; bottom: 1.75rem;
-    font-size: 0.7rem; color: var(--border);
-    letter-spacing: 0.05em;
-    opacity: 0; animation: up 0.6s ease forwards 0.8s;
-  }
-
-  @keyframes up {
-    from { opacity:0; transform:translateY(16px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
+  .footer { position: fixed; bottom: 1.75rem; font-size: 0.7rem; color: var(--border); letter-spacing: 0.05em; opacity: 0; animation: up 0.6s ease forwards 0.8s; }
+  @keyframes up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">Face Recognition · Attendance</p>
+  <p class="eyebrow">Face Recognition Attendance</p>
   <h1>Attend<em>X</em></h1>
   <p class="sub">Enroll once. Walk in. That's it.</p>
   <div class="cards">
-    <a href="student.html" class="card student">
+    <a href="login.html" class="card">
       <div class="card-dot"></div>
-      <h3>Student</h3>
-      <p>Enroll or view your attendance record.</p>
+      <h3>Organizer</h3>
+      <p>Create a space, manage members, view reports.</p>
       <span class="card-arrow">↗</span>
     </a>
-    <a href="attend.html" class="card">
+    <a href="student.html" class="card">
       <div class="card-dot" style="background:#4a9eff"></div>
-      <h3>Mark Attendance</h3>
-      <p>Classroom machine — scan your face.</p>
-      <span class="card-arrow">↗</span>
-    </a>
-    <a href="admin.html" class="card admin">
-      <div class="card-dot"></div>
-      <h3>Admin</h3>
-      <p>Reports, students, daily overview.</p>
+      <h3>Member</h3>
+      <p>Join a space and view your attendance.</p>
       <span class="card-arrow">↗</span>
     </a>
   </div>
 </div>
-<p class="footer">AttendX · v1.0</p>
+<p class="footer">AttendX · v2.0</p>
 </body>
 </html>
