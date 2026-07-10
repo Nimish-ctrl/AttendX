@@ -39,7 +39,8 @@ def get_embedding(image_path: str) -> np.ndarray:
         img_path          = image_path,
         model_name        = MODEL_NAME,
         enforce_detection = True,
-        detector_backend  = "opencv",
+        detector_backend  = "yunet",
+        anti_spoofing=True ,
     )
     if len(result) == 0:
         raise ValueError("No face detected.")
