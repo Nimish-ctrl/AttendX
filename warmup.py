@@ -14,10 +14,12 @@ try:
     DeepFace.represent(
         img_path=tmp.name,
         model_name="Facenet512",
-        detector_backend="opencv",
+        detector_backend="yunet",
         enforce_detection=True,
+        anti_spoofing=True,
+
     )
 except Exception:
     pass  
 
-print("OpenCV detector + Facenet512 weights downloaded")
+print("yunet detector + Facenet512 weights downloaded")
